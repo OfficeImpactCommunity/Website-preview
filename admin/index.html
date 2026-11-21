@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' blob: data: https://ozvtyutfjswajksjzcec.supabase.co; connect-src 'self' https://ozvtyutfjswajksjzcec.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; frame-src https://www.google.com https://maps.google.com; form-action 'none'; media-src 'none'; worker-src 'none'">
+  <title>Administration | Office Impact Community</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <link rel="stylesheet" href="./admin.css?v=20261121-admin-filter-buttons-3">
+</head>
+<body class="admin-page">
+  <header class="site-header">
+    <div class="shell site-header__inner">
+      <a class="brand brand--logo" href="../" aria-label="Office Impact Community home">
+        <img class="brand-logo" src="../media/office-impact-logo.png" alt="Office Impact Community">
+      </a>
+      <span class="admin-header-label">Administration</span>
+      <a class="button button--dark admin-back" href="../">Back to website</a>
+    </div>
+  </header>
+
+  <main class="shell admin-main">
+    <section class="admin-hero admin-hero--compact">
+      <span class="section-kicker">Office Impact Community</span>
+      <h1>Manage <em>your content.</em></h1>
+      <p>Sign in with your approved Google account to manage events, stories and the team. Changes are saved as drafts until an administrator publishes them.</p>
+    </section>
+
+    <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+
+    <section id="loginView" class="admin-auth-card">
+      <span class="section-kicker">Secure administration</span>
+      <h2>Welcome back.</h2>
+      <p>Use the Google account that has been granted access to Office Impact administration.</p>
+      <button id="googleSignIn" class="button button--dark" type="button">Continue with Google</button>
+    </section>
+
+    <section id="accessView" class="admin-auth-card" hidden>
+      <span class="section-kicker">Access pending</span>
+      <h2>This Google account does not have access yet.</h2>
+      <p id="accessMessage">You are signed in, but this email is not currently authorised to use the administration console. An administrator must add your email as an Editor or Admin. Once access has been granted, sign in again.</p>
+      <p class="admin-access-email">Signed in as <strong id="accessEmail"></strong></p>
+      <div class="admin-access-buttons">
+        <button id="retryAccess" class="button button--accent" type="button">Check access again</button>
+        <button id="signOutAccess" class="admin-small-button" type="button">Sign out</button>
+      </div>
+    </section>
+
+    <section id="editorView" hidden>
+      <div class="admin-account-bar">
+        <div><strong id="signedInEmail"></strong><span id="roleLabel" class="admin-role"></span></div>
+        <button id="signOutEditor" class="admin-text-button" type="button">Sign out</button>
+      </div>
+
+      <div class="admin-workspace">
+        <aside class="admin-sidebar">
+          <span class="section-kicker">Workspace</span>
+          <button class="admin-tab is-active" type="button" data-tab="entries">Events &amp; Stories</button>
+          <button class="admin-tab" type="button" data-tab="people">Team</button>
+          <button id="accessTab" class="admin-tab" type="button" data-tab="access" hidden>Users &amp; access</button>
+          <div class="admin-sidebar__note">All changes are drafts until published by an administrator.</div>
+        </aside>
+
+        <div class="admin-content">
+          <div id="contentHeading" class="admin-content__heading">
+            <div>
+              <span class="section-kicker">Content library</span>
+              <h2>Your content <span id="listCount">0</span></h2>
+            </div>
+            <div class="admin-heading-actions">
+              <button id="openFilters" class="admin-filter-trigger" type="button" aria-label="Filter content" title="Filter content">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4"/></svg>
+                <span>Filter</span>
+              </button>
+            </div>
+            <div id="newEntryActions" class="admin-create-actions">
+              <button id="newEvent" class="admin-small-button" type="button">New event +</button>
+              <button id="newStory" class="admin-small-button" type="button">New story +</button>
+              <button id="newEntry" class="button button--dark" type="button">Event + story</button>
+            </div>
+            <div id="newPersonActions" hidden>
+              <button id="newPerson" class="button button--dark" type="button">Add team member +</button>
+            </div>
+          </div>
+
+          <div id="recordList" class="admin-record-list"></div>
+
+          <section id="contentPreviewPanel" class="admin-content-preview" aria-label="Public website preview">
+            <div class="admin-preview-title">
+              <div>
+                <span class="section-kicker">Website preview</span>
+                <h2>How it will look on the website</h2>
+                <p>A preview of the content as it appears on the public website. Status and editing controls are kept separate above each item.</p>
+              </div>
+            </div>
+            <div id="contentPreview" class="admin-preview-content"></div>
+          </section>
+
+          <section id="userAccessPanel" class="admin-access-panel" hidden>
+            <div class="admin-access-heading">
+              <div>
+                <span class="section-kicker">Administration</span>
+                <h2>Users &amp; access</h2>
+                <p>Grant an email address Editor or Admin access. If the person has not signed in before, the access grant is saved and applied automatically when they first sign in with Google using that exact email address. No invitation email is sent.</p>
+              </div>
+            </div>
+
+            <form id="editorAccessForm" class="admin-access-form">
+              <div class="admin-field">
+                <label for="accessGrantEmail">Google account email</label>
+                <input id="accessGrantEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+              </div>
+              <div class="admin-field">
+                <label for="accessGrantRole">Role</label>
+                <select id="accessGrantRole" name="role">
+                  <option value="editor">Editor — create and edit drafts</option>
+                  <option value="admin">Admin — manage users and publish</option>
+                </select>
+              </div>
+              <button id="grantAccessButton" class="button button--dark" type="submit">Grant access</button>
+            </form>
+
+            <div class="admin-access-list-heading">
+              <h3>Authorised accounts</h3>
+              <button id="refreshAccessList" class="admin-text-button" type="button">Refresh</button>
+            </div>
+            <div id="editorAccessList" class="admin-access-list"></div>
+          </section>
+
+          <section id="editorPanel" class="admin-edit-panel" hidden>
+            <div class="admin-edit-heading">
+              <div>
+                <span class="section-kicker">Draft editor</span>
+                <h2 id="editorTitle">Edit content</h2>
+                <p id="editorMeta"></p>
+              </div>
+              <button id="cancelEdit" class="admin-text-button" type="button">Close</button>
+            </div>
+
+            <div id="kindControl" class="admin-kind-control">
+              <label for="contentKind">Content appears in</label>
+              <select id="contentKind">
+                <option value="event">Events only</option>
+                <option value="story">Stories only</option>
+                <option value="event_story">Events and Stories</option>
+              </select>
+            </div>
+
+            <form id="contentForm">
+              <div id="editorFields" class="admin-form-grid"></div>
+              <div class="admin-form-actions">
+                <button id="saveDraft" class="button button--dark" type="button">Save draft</button>
+                <button id="publishDraft" class="button button--accent" type="button" hidden>Publish</button>
+                <button id="unpublishLive" class="admin-small-button" type="button" hidden>Unpublish live</button>
+                <button id="deleteDraft" class="admin-danger-button" type="button" hidden>Delete draft</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <dialog class="content-dialog admin-preview-dialog" id="adminPreviewDialog" aria-label="Content detail preview">
+    <button class="dialog-close" id="adminPreviewDialogClose" type="button" aria-label="Close details">&times;</button>
+    <div id="adminPreviewDialogContent"></div>
+  </dialog>
+
+  <footer class="footer admin-footer">
+    <div class="shell footer-grid">
+      <a class="brand brand--footer brand--logo" href="../">
+        <img class="brand-logo brand-logo--footer" src="../media/office-impact-logo.png" alt="Office Impact Community">
+      </a>
+      <p>Office Impact Community website administration.</p>
+      <div class="footer-links"><a href="../">Public website &nearr;</a></div>
+      <small class="admin-build-info">Admin UI v2026.11.21.4 · Updated 21 Nov 2026</small>
+    </div>
+  </footer>
+  <dialog id="filterDialog" class="admin-filter-dialog" aria-labelledby="filterDialogTitle">
+    <div class="admin-filter-dialog__heading">
+      <div><span class="section-kicker">Content library</span><h2 id="filterDialogTitle">Filter content</h2></div>
+      <button id="closeFilters" class="admin-text-button" type="button" aria-label="Close filters">&times;</button>
+    </div>
+    <div class="admin-filter-fields">
+      <section class="admin-filter-group" aria-label="Filter by status">
+        <strong>Status</strong>
+        <div class="admin-filter-options">
+          <button type="button" class="admin-status admin-filter-option" data-filter-field="status" data-filter-value="all" aria-pressed="true">All</button>
+          <button type="button" class="admin-status admin-status--live admin-filter-option" data-filter-field="status" data-filter-value="live" aria-pressed="false">Live</button>
+          <button type="button" class="admin-status admin-status--draft admin-filter-option" data-filter-field="status" data-filter-value="changes" aria-pressed="false">Draft edits</button>
+          <button type="button" class="admin-status admin-status--draft admin-filter-option" data-filter-field="status" data-filter-value="draft" aria-pressed="false">Draft</button>
+        </div>
+      </section>
+      <section class="admin-filter-group" aria-label="Filter by date">
+        <strong>Date</strong>
+        <div class="admin-filter-options">
+          <button type="button" class="admin-status admin-filter-option" data-filter-field="date" data-filter-value="all" aria-pressed="true">Any date</button>
+          <button type="button" class="admin-status admin-filter-option" data-filter-field="date" data-filter-value="today" aria-pressed="false">Today</button>
+          <button type="button" class="admin-status admin-filter-option" data-filter-field="date" data-filter-value="week" aria-pressed="false">Last week</button>
+        </div>
+      </section>
+      <section class="admin-filter-group" aria-label="Filter by creator">
+        <strong>Created by</strong>
+        <div class="admin-filter-options">
+          <button type="button" class="admin-status admin-filter-option" data-filter-field="creator" data-filter-value="me" aria-pressed="false">Created by me</button>
+        </div>
+        <small>Creator names are not available, so this uses your signed-in account.</small>
+      </section>
+    </div>
+    <div class="admin-filter-actions">
+      <button id="clearFilters" class="admin-small-button" type="button">Clear filters</button>
+      <button id="applyFilters" class="button button--dark" type="button">Apply filters</button>
+    </div>
+  </dialog>
+  <dialog class="admin-image-editor" id="imageCropDialog" aria-labelledby="imageCropTitle">
+    <div class="admin-image-editor__header">
+      <div><span class="section-kicker">Image editor</span><h2 id="imageCropTitle">Adjust image</h2></div>
+      <button class="admin-text-button" id="imageCropCancelTop" type="button" aria-label="Close image editor">&times;</button>
+    </div>
+    <div class="admin-image-editor__workspace"><img id="imageCropSource" alt="Image to edit"></div>
+    <div class="admin-image-editor__tools" aria-label="Image editing tools">
+      <button class="admin-small-button admin-image-editor__icon-button" type="button" data-crop-action="rotate-left" aria-label="Rotate left" title="Rotate left"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10V4m0 0h6M4 4l4 4a8 8 0 1 1-2 8"/></svg></button>
+      <button class="admin-small-button admin-image-editor__icon-button" type="button" data-crop-action="rotate-right" aria-label="Rotate right" title="Rotate right"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10V4m0 0h-6m6 0-4 4a8 8 0 1 0 2 8"/></svg></button>
+      <button class="admin-small-button admin-image-editor__icon-button" type="button" data-crop-action="flip-horizontal" aria-label="Mirror horizontally" title="Mirror horizontally"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v18M3 7h6l-3 5 3 5H3zM21 7h-6l3 5-3 5h6z"/></svg></button>
+      <button class="admin-small-button admin-image-editor__icon-button" type="button" data-crop-action="flip-vertical" aria-label="Mirror vertically" title="Mirror vertically"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12h18M7 3v6l5-3 5 3V3zM7 21v-6l5 3 5-3v6z"/></svg></button>
+      <button class="admin-small-button admin-image-editor__icon-button" type="button" data-crop-action="reset" aria-label="Reset edits" title="Reset edits"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5"/></svg></button>
+    </div>
+    <p class="admin-image-editor__hint">Drag the image to reposition it and drag the crop handles to select the area to keep.</p>
+    <div class="admin-image-editor__actions">
+      <button class="admin-small-button admin-image-editor__icon-button" id="imageCropCancel" type="button" aria-label="Cancel" title="Cancel"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      <button class="button button--dark admin-image-editor__icon-button" id="imageCropApply" type="button" aria-label="Apply and upload" title="Apply and upload"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l4 4L19 6"/></svg></button>
+    </div>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js" defer></script>
+  <script type="module" src="./admin.js?v=20261121-admin-filter-buttons-3"></script>
+</body>
+</html>
